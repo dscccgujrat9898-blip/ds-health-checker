@@ -10,7 +10,11 @@ a = Analysis(
         ('smartmontools', 'smartmontools'),
         ('assets/ds.ico', 'assets'),
     ],
-    hiddenimports=[],
+    hiddenimports=[
+        'pystray._win32',
+        'PIL._tkinter_finder',
+        'win10toast',
+    ],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
