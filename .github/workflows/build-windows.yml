@@ -24,19 +24,29 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Install smartmontools
+      - name: Install smartmontools (smartctl) and bundle it
+        shell: pwsh
         run: |
           choco install smartmontools -y
+          $smartctl = "C:\Program Files\smartmontools\bin\smartctl.exe"
+          if (!(Test-Path $smartctl)) {
+            $smartctl = "C:\Program Files\smartmontools\smartctl.exe"
+          }
+          if (!(Test-Path $smartctl)) {
+            Write-Host "smartctl.exe not found after install!"
+            Get-ChildItem "C:\Program Files\smartmontools" -Recurse | Select-Object FullName
+            exit 1
+          }
           mkdir smartmontools
-          $p = (Get-Command smartctl.exe).Source
-          Copy-Item (Split-Path $p -Parent) smartmontools -Recurse -Force
+          Copy-Item (Split-Path $smartctl -Parent) smartmontools -Recurse -Force
+          Write-Host "Bundled smartctl from: $smartctl"
 
-      - name: Build EXE
+      - name: Build EXE (PyInstaller)
         run: |
           pyinstaller ds_health_checker.spec
 
-      - name: Upload EXE
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DS_Health_Checker
+          name: DS_Health_Checker_Windows
           path: dist/DS_Health_Checker/**
